@@ -8,10 +8,12 @@ import java.net.Socket;
  * @author: BaiLong on  2017-09-05  4:34 PM
  */
 public class TCPProxy {
+
+    private static final int buf_size = 1024*200;
     public static void main(String[] args) throws Exception {
 
-        String[] splitRemote = args[1].split(":");
         String[] splitLocal = args[0].split(":");
+        String[] splitRemote = args[1].split(":");
 
         String remoteIP = splitRemote[0];
         int remotePort = Integer.parseInt(splitRemote[1]);
@@ -45,8 +47,6 @@ public class TCPProxy {
         } finally {
             listener.close();
         }
-
-        Thread.yield();
     }
 
     private static  void transfer(Socket socketIn, Socket socketOut) {
@@ -56,9 +56,9 @@ public class TCPProxy {
                 OutputStream s_out = socketOut.getOutputStream();
                 while (true) {
                     int len = 0;
-                    byte[] buf = new byte[1024];
+                    byte[] buf = new byte[buf_size];
                     len = inputStream.read(buf);
-                    System.out.println(len);
+//                    System.out.println(len);
                     if (len > 0) {
                         s_out.write(buf, 0, len);
                         s_out.flush();
@@ -84,7 +84,8 @@ public class TCPProxy {
                     e.printStackTrace();
                 }
             }
-            System.out.println("请求处理完成");
+            System.out.println("request complete!");
         }
     }
 }
+
