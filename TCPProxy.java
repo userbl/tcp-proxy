@@ -10,7 +10,7 @@ import java.net.SocketAddress;
  */
 public class TCPProxy {
 
-    private static final int buf_size = 1024 * 200;
+    private static final int buf_size = 1024 * 1024;
 
     public static void main(String[] args) throws Exception {
 
@@ -26,15 +26,19 @@ public class TCPProxy {
         try {
             while (true) {
                 Socket socket = listener.accept();
-                SocketAddress remoteSocketAddress = socket.getRemoteSocketAddress();
-                System.out.println("Process request from " + remoteSocketAddress);
-                try {
-                    Socket remote = new Socket(remoteIP, remotePort);
-                    new Thread(() -> transfer(socket, remote)).start();
-                    new Thread(() -> transfer(remote, socket)).start();
-                } finally {
-//                    socket.close();
-                }
+                new Thread(() -> {
+                    SocketAddress remoteSocketAddress = socket.getRemoteSocketAddress();
+                    System.out.println("Process request from " + remoteSocketAddress);
+                    try {
+                        Socket remote = new Socket(remoteIP, remotePort);
+                        new Thread(() -> transfer(socket, remote)).start();
+                        new Thread(() -> transfer(remote, socket)).start();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }).start();
+
+
             }
         } catch (Exception e) {
             e.printStackTrace();
