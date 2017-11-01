@@ -10,7 +10,8 @@ import java.net.SocketAddress;
  */
 public class TCPProxy {
 
-    private static final int buf_size = 1024*200;
+    private static final int buf_size = 1024 * 200;
+
     public static void main(String[] args) throws Exception {
 
         String[] splitLocal = args[0].split(":");
@@ -26,21 +27,11 @@ public class TCPProxy {
             while (true) {
                 Socket socket = listener.accept();
                 SocketAddress remoteSocketAddress = socket.getRemoteSocketAddress();
-                System.out.println("Process request from "+remoteSocketAddress);
+                System.out.println("Process request from " + remoteSocketAddress);
                 try {
                     Socket remote = new Socket(remoteIP, remotePort);
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            transfer(socket, remote);
-                        }
-                    }).start();
-                    new Thread(new Runnable() {
-                        @Override
-                        public void run() {
-                            transfer(remote, socket);
-                        }
-                    }).start();
+                    new Thread(() -> transfer(socket, remote)).start();
+                    new Thread(() -> transfer(remote, socket)).start();
                 } finally {
 //                    socket.close();
                 }
@@ -52,22 +43,22 @@ public class TCPProxy {
         }
     }
 
-    private static  void transfer(Socket socketIn, Socket socketOut) {
+    private static void transfer(Socket socketIn, Socket socketOut) {
         try {
-            if(!socketIn.isClosed() && !socketOut.isClosed()) {
-                InputStream inputStream = socketIn.getInputStream();
-                OutputStream s_out = socketOut.getOutputStream();
-                byte[] buf = new byte[buf_size];
-                while (true) {
-                    int len = 0;
-                    //byte[] buf = new byte[buf_size];
-                    len = inputStream.read(buf);
+            if (!socketIn.isClosed() && !socketOut.isClosed()) {
+                try (InputStream inputStream = socketIn.getInputStream();
+                     OutputStream s_out = socketOut.getOutputStream()) {
+                    byte[] buf = new byte[buf_size];
+                    while (true) {
+                        int len = 0;
+                        len = inputStream.read(buf);
 //                    System.out.println(len);
-                    if (len > 0) {
-                        s_out.write(buf, 0, len);
-                        s_out.flush();
-                    } else {
-                        break;
+                        if (len > 0) {
+                            s_out.write(buf, 0, len);
+                            s_out.flush();
+                        } else {
+                            break;
+                        }
                     }
                 }
             }
