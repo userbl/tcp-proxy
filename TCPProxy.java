@@ -3,6 +3,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketAddress;
 
 /**
  * @author: BaiLong on  2017-09-05  4:34 PM
@@ -24,6 +25,8 @@ public class TCPProxy {
         try {
             while (true) {
                 Socket socket = listener.accept();
+                SocketAddress remoteSocketAddress = socket.getRemoteSocketAddress();
+                System.out.println("Process requdst from "+remoteSocketAddress);
                 try {
                     Socket remote = new Socket(remoteIP, remotePort);
                     new Thread(new Runnable() {
@@ -54,9 +57,10 @@ public class TCPProxy {
             if(!socketIn.isClosed() && !socketOut.isClosed()) {
                 InputStream inputStream = socketIn.getInputStream();
                 OutputStream s_out = socketOut.getOutputStream();
+                byte[] buf = new byte[buf_size];
                 while (true) {
                     int len = 0;
-                    byte[] buf = new byte[buf_size];
+                    //byte[] buf = new byte[buf_size];
                     len = inputStream.read(buf);
 //                    System.out.println(len);
                     if (len > 0) {
