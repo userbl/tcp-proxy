@@ -26,7 +26,7 @@ public class TCPProxy {
             while (true) {
                 Socket socket = listener.accept();
                 SocketAddress remoteSocketAddress = socket.getRemoteSocketAddress();
-                System.out.println("Process requdst from "+remoteSocketAddress);
+                System.out.println("Process request from "+remoteSocketAddress);
                 try {
                     Socket remote = new Socket(remoteIP, remotePort);
                     new Thread(new Runnable() {
